@@ -1,0 +1,61 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_REGION: us-east-1
+      ECR_REPO_AUTH: <aws_account_id>.dkr.ecr.us-east-1.amazonaws.com/auth
+      ECR_REPO_BILLING: <aws_account_id>.dkr.ecr.us-east-1.amazonaws.com/billing
+      ECR_REPO_PRODUCT: <aws_account_id>.dkr.ecr.us-east-1.amazonaws.com/product
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies and run tests (auth)
+      run: |
+        pip install -r services/auth/requirements.txt
+        python -m unittest discover services/auth/tests
+
+    - name: Install dependencies and run tests (billing)
+      run: |
+        pip install -r services/billing/requirements.txt
+        python -m unittest discover services/billing/tests
+
+    - name: Install dependencies and run tests (product)
+      run: |
+        pip install -r services/product/requirements.txt
+        python -m unittest discover services/product/tests
+
+    - name: Log in to AWS ECR
+      run: |
+        aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin ${{ env.ECR_REPO_AUTH }}
+
+    - name: Build and Push Docker Images
+      run: |
+        docker build -t auth ./services/auth
+        docker tag auth $ECR_REPO_AUTH:latest
+        docker push $ECR_REPO_AUTH:latest
+
+        docker build -t billing ./services/billing
+        docker tag billing $ECR_REPO_BILLING:latest
+        docker push $ECR_REPO_BILLING:latest
+
+        docker build -t product ./services/product
+        docker tag product $ECR_REPO_PRODUCT:latest
+        docker push $ECR_REPO_PRODUCT:latest
