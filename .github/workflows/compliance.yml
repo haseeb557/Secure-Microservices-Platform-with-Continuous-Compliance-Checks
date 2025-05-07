@@ -1,4 +1,4 @@
-name: Continuous Compliance Checks
+name: Compliance Checks
 
 on:
   push:
