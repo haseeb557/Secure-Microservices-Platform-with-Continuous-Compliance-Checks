@@ -1,6 +1,7 @@
 import boto3
 
 def check_open_ports():
+    region = 'us-east-1'
     client = boto3.client('ec2')
     security_groups = client.describe_security_groups()
 

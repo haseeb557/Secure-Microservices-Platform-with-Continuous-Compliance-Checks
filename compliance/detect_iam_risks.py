@@ -1,6 +1,7 @@
 import boto3
 
 def detect_admin_iam_users():
+    region = 'us-east-1'
     iam = boto3.client('iam')
     users = iam.list_users()
 

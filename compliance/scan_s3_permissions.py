@@ -1,6 +1,7 @@
 import boto3
 
 def scan_s3_permissions():
+    region = 'us-east-1'
     s3 = boto3.client('s3')
     buckets = s3.list_buckets()
 
