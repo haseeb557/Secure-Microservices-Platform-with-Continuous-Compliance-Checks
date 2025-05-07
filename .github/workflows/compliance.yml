@@ -1,5 +1,3 @@
-# .github/workflows/compliance.yml
-
 name: Continuous Compliance Checks
 
 on:
@@ -14,6 +12,9 @@ jobs:
   compliance:
     name: Run Compliance Scripts
     runs-on: ubuntu-latest
+
+    env:
+      AWS_REGION: us-east-1  # Set your desired AWS region here
 
     steps:
       - name: Checkout Code
