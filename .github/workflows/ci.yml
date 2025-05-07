@@ -27,12 +27,7 @@ jobs:
       with:
         python-version: '3.9'
 
-    - name: Install Trivy
-      run: |
-        curl -sfL https://github.com/aquasecurity/trivy/releases/download/v0.29.2/trivy_0.29.2_Linux-64bit.deb -o trivy.deb
-        sudo dpkg -i trivy.deb
-        trivy --version  # Verify Trivy is installed successfully
-
+    # Install dependencies and run tests for auth
     - name: Install dependencies and run tests (auth)
       run: |
         pip install -r services/auth/requirements.txt
@@ -40,6 +35,7 @@ jobs:
       env:
         PYTHONPATH: services/auth
 
+    # Install dependencies and run tests for billing
     - name: Install dependencies and run tests (billing)
       run: |
         pip install -r services/billing/requirements.txt
@@ -47,6 +43,7 @@ jobs:
       env:
         PYTHONPATH: services/billing
 
+    # Install dependencies and run tests for product
     - name: Install dependencies and run tests (product)
       run: |
         pip install -r services/product/requirements.txt
@@ -54,6 +51,40 @@ jobs:
       env:
         PYTHONPATH: services/product
 
+    # Authenticate with Snyk
+    - name: Authenticate with Snyk
+      run: snyk auth ${{ secrets.SNYK_TOKEN }}
+
+    # Test dependencies with Snyk (auth)
+    - name: Test dependencies with Snyk (auth)
+      run: snyk test --all-projects services/auth
+
+    # Test dependencies with Snyk (billing)
+    - name: Test dependencies with Snyk (billing)
+      run: snyk test --all-projects services/billing
+
+    # Test dependencies with Snyk (product)
+    - name: Test dependencies with Snyk (product)
+      run: snyk test --all-projects services/product
+
+    # Install Trivy for Docker image scanning
+    - name: Install Trivy
+      run: |
+        curl -s https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo bash
+
+    # Scan Docker image for vulnerabilities (auth)
+    - name: Scan Docker image for vulnerabilities (auth)
+      run: trivy image $ECR_REPO_AUTH:latest
+
+    # Scan Docker image for vulnerabilities (billing)
+    - name: Scan Docker image for vulnerabilities (billing)
+      run: trivy image $ECR_REPO_BILLING:latest
+
+    # Scan Docker image for vulnerabilities (product)
+    - name: Scan Docker image for vulnerabilities (product)
+      run: trivy image $ECR_REPO_PRODUCT:latest
+
+    # Configure AWS credentials
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v2
       with:
@@ -61,48 +92,28 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
 
+    # Log in to AWS ECR
     - name: Log in to AWS ECR
       run: |
         aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO_AUTH
 
-    - name: Build and Push Docker Images
+    # Build and Push Docker Images (auth)
+    - name: Build and Push Docker Images (auth)
       run: |
         docker build -t auth ./services/auth
         docker tag auth $ECR_REPO_AUTH:latest
         docker push $ECR_REPO_AUTH:latest
 
+    # Build and Push Docker Images (billing)
+    - name: Build and Push Docker Images (billing)
+      run: |
         docker build -t billing ./services/billing
         docker tag billing $ECR_REPO_BILLING:latest
         docker push $ECR_REPO_BILLING:latest
 
+    # Build and Push Docker Images (product)
+    - name: Build and Push Docker Images (product)
+      run: |
         docker build -t product ./services/product
         docker tag product $ECR_REPO_PRODUCT:latest
         docker push $ECR_REPO_PRODUCT:latest
-
-    - name: Scan Docker image for vulnerabilities (auth)
-      run: |
-        trivy image $ECR_REPO_AUTH:latest
-
-    - name: Scan Docker image for vulnerabilities (billing)
-      run: |
-        trivy image $ECR_REPO_BILLING:latest
-
-    - name: Scan Docker image for vulnerabilities (product)
-      run: |
-        trivy image $ECR_REPO_PRODUCT:latest
-
-    - name: Install Snyk
-      run: |
-        npm install -g snyk
-
-    - name: Test dependencies with Snyk (auth)
-      run: |
-        snyk test --all-projects services/auth
-
-    - name: Test dependencies with Snyk (billing)
-      run: |
-        snyk test --all-projects services/billing
-
-    - name: Test dependencies with Snyk (product)
-      run: |
-        snyk test --all-projects services/product
