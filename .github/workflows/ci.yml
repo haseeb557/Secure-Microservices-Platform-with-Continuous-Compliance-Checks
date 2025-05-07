@@ -31,16 +31,22 @@ jobs:
       run: |
         pip install -r services/auth/requirements.txt
         python -m unittest discover services/auth/tests
+      env:
+        PYTHONPATH: services/auth
 
     - name: Install dependencies and run tests (billing)
       run: |
         pip install -r services/billing/requirements.txt
         python -m unittest discover services/billing/tests
+      env:
+        PYTHONPATH: services/billing
 
     - name: Install dependencies and run tests (product)
       run: |
         pip install -r services/product/requirements.txt
         python -m unittest discover services/product/tests
+      env:
+        PYTHONPATH: services/product
 
     - name: Log in to AWS ECR
       run: |
@@ -59,3 +65,4 @@ jobs:
         docker build -t product ./services/product
         docker tag product $ECR_REPO_PRODUCT:latest
         docker push $ECR_REPO_PRODUCT:latest
+
