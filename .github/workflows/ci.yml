@@ -27,6 +27,10 @@ jobs:
       with:
         python-version: '3.9'
 
+    - name: Install Trivy
+      run: |
+        curl -s https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo bash
+
     - name: Install dependencies and run tests (auth)
       run: |
         pip install -r services/auth/requirements.txt
@@ -59,47 +63,6 @@ jobs:
       run: |
         aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO_AUTH
 
-    # Install Trivy
-    - name: Install Trivy
-      run: |
-        curl -s https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo bash
-
-    # Scan Docker image for vulnerabilities (auth)
-    - name: Scan Docker image for vulnerabilities (auth)
-      run: |
-        trivy image $ECR_REPO_AUTH:latest
-
-    # Scan Docker image for vulnerabilities (billing)
-    - name: Scan Docker image for vulnerabilities (billing)
-      run: |
-        trivy image $ECR_REPO_BILLING:latest
-
-    # Scan Docker image for vulnerabilities (product)
-    - name: Scan Docker image for vulnerabilities (product)
-      run: |
-        trivy image $ECR_REPO_PRODUCT:latest
-
-    # Install Snyk
-    - name: Install Snyk
-      run: |
-        npm install -g snyk
-
-    # Test dependencies with Snyk (auth)
-    - name: Test dependencies with Snyk (auth)
-      run: |
-        snyk test services/auth
-
-    # Test dependencies with Snyk (billing)
-    - name: Test dependencies with Snyk (billing)
-      run: |
-        snyk test services/billing
-
-    # Test dependencies with Snyk (product)
-    - name: Test dependencies with Snyk (product)
-      run: |
-        snyk test services/product
-
-    # Build and Push Docker Images
     - name: Build and Push Docker Images
       run: |
         docker build -t auth ./services/auth
@@ -113,3 +76,31 @@ jobs:
         docker build -t product ./services/product
         docker tag product $ECR_REPO_PRODUCT:latest
         docker push $ECR_REPO_PRODUCT:latest
+
+    - name: Scan Docker image for vulnerabilities (auth)
+      run: |
+        trivy image $ECR_REPO_AUTH:latest
+
+    - name: Scan Docker image for vulnerabilities (billing)
+      run: |
+        trivy image $ECR_REPO_BILLING:latest
+
+    - name: Scan Docker image for vulnerabilities (product)
+      run: |
+        trivy image $ECR_REPO_PRODUCT:latest
+
+    - name: Install Snyk
+      run: |
+        npm install -g snyk
+
+    - name: Test dependencies with Snyk (auth)
+      run: |
+        snyk test --all-projects services/auth
+
+    - name: Test dependencies with Snyk (billing)
+      run: |
+        snyk test --all-projects services/billing
+
+    - name: Test dependencies with Snyk (product)
+      run: |
+        snyk test --all-projects services/product
