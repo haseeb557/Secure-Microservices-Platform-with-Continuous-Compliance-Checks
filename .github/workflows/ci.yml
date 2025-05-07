@@ -27,6 +27,12 @@ jobs:
       with:
         python-version: '3.9'
 
+    - name: Install Trivy
+      run: |
+        curl -sfL https://github.com/aquasecurity/trivy/releases/download/v0.29.2/trivy_0.29.2_Linux-64bit.deb -o trivy.deb
+        sudo dpkg -i trivy.deb
+        trivy --version  # Verify Trivy is installed successfully
+
     - name: Install dependencies and run tests (auth)
       run: |
         pip install -r services/auth/requirements.txt
@@ -59,34 +65,28 @@ jobs:
       run: |
         aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO_AUTH
 
-    - name: Build Docker Images
+    - name: Build and Push Docker Images
       run: |
         docker build -t auth ./services/auth
         docker tag auth $ECR_REPO_AUTH:latest
+        docker push $ECR_REPO_AUTH:latest
 
         docker build -t billing ./services/billing
         docker tag billing $ECR_REPO_BILLING:latest
+        docker push $ECR_REPO_BILLING:latest
 
         docker build -t product ./services/product
         docker tag product $ECR_REPO_PRODUCT:latest
+        docker push $ECR_REPO_PRODUCT:latest
 
-    - name: Scan Docker Image for Vulnerabilities (auth)
+    - name: Scan Docker image for vulnerabilities (auth)
       run: |
-        curl -s https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo bash
         trivy image $ECR_REPO_AUTH:latest
 
-    - name: Scan Docker Image for Vulnerabilities (billing)
+    - name: Scan Docker image for vulnerabilities (billing)
       run: |
-        curl -s https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo bash
         trivy image $ECR_REPO_BILLING:latest
 
-    - name: Scan Docker Image for Vulnerabilities (product)
+    - name: Scan Docker image for vulnerabilities (product)
       run: |
-        curl -s https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo bash
         trivy image $ECR_REPO_PRODUCT:latest
-
-    - name: Push Docker Images to ECR
-      run: |
-        docker push $ECR_REPO_AUTH:latest
-        docker push $ECR_REPO_BILLING:latest
-        docker push $ECR_REPO_PRODUCT:latest
