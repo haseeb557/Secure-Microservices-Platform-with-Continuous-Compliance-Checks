@@ -29,7 +29,9 @@ jobs:
 
     - name: Install Trivy
       run: |
-        curl -s https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo bash
+        curl -sfL https://github.com/aquasecurity/trivy/releases/download/v0.29.2/trivy_0.29.2_Linux-64bit.deb -o trivy.deb
+        sudo dpkg -i trivy.deb
+        trivy --version  # Verify Trivy is installed successfully
 
     - name: Install dependencies and run tests (auth)
       run: |
