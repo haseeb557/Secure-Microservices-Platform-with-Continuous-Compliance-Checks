@@ -14,9 +14,9 @@ jobs:
 
     env:
       AWS_REGION: us-east-1
-      ECR_REPO_AUTH: <aws_account_id>.dkr.ecr.us-east-1.amazonaws.com/auth
-      ECR_REPO_BILLING: <aws_account_id>.dkr.ecr.us-east-1.amazonaws.com/billing
-      ECR_REPO_PRODUCT: <aws_account_id>.dkr.ecr.us-east-1.amazonaws.com/product
+      ECR_REPO_AUTH: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/auth
+      ECR_REPO_BILLING: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/billing
+      ECR_REPO_PRODUCT: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/product
 
     steps:
     - name: Checkout code
@@ -48,9 +48,16 @@ jobs:
       env:
         PYTHONPATH: services/product
 
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
     - name: Log in to AWS ECR
       run: |
-        aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin ${{ env.ECR_REPO_AUTH }}
+        aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO_AUTH
 
     - name: Build and Push Docker Images
       run: |
@@ -65,4 +72,3 @@ jobs:
         docker build -t product ./services/product
         docker tag product $ECR_REPO_PRODUCT:latest
         docker push $ECR_REPO_PRODUCT:latest
-
