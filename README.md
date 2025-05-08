@@ -35,5 +35,6 @@ secure-microservices-compliance-platform/
 ├── scripts/                # Bash/Python for backups and compliance checks
 ├── .github/workflows/      # GitHub Actions CI/CD pipelines
 └── README.md
-
+##  Diagram
+![Image](https://github.com/user-attachments/assets/518a5e15-a0da-4fc1-ae0e-72136816dd32)
 
