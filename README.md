@@ -9,8 +9,7 @@ This project implements a secure, scalable, cloud-native microservices platform 
 - Microservices containerization (Docker + ECS)
 - Infrastructure as Code (Terraform on AWS)
 - Continuous integration/deployment (GitHub Actions)
-- Real-time compliance checks (Python/Bash scripts)
-- Monitoring and alerting (Prometheus + Grafana + Slack)
+
 
 ---
 
@@ -36,4 +35,5 @@ secure-microservices-compliance-platform/
 ├── scripts/                # Bash/Python for backups and compliance checks
 ├── .github/workflows/      # GitHub Actions CI/CD pipelines
 └── README.md
+
 
