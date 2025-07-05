@@ -1,6 +1,6 @@
 # Secure Microservices Platform with Continuous Compliance Checks
 
-## 🚀 Project Overview
+## Project Overview
 
 This project demonstrates how to build a secure and scalable microservices platform using DevOps and DevSecOps principles. Key features include:
 
@@ -11,7 +11,7 @@ This project demonstrates how to build a secure and scalable microservices platf
   
 ---
 
-## 🔧 Technologies Used
+## Technologies Used
 
 - AWS Services: EC2, ECS, VPC, IAM, S3
 - IaC: Terraform
@@ -22,7 +22,7 @@ This project demonstrates how to build a secure and scalable microservices platf
 
 ---
 
-## 🌐 Infrastructure Overview
+## Infrastructure Overview
 
 - EC2 Instance: Acts as a bastion host or compliance runner.
 - ECS + Fargate: Hosts containerized microservices (auth, billing, product).
@@ -32,7 +32,7 @@ This project demonstrates how to build a secure and scalable microservices platf
 
 ---
 
-## ⚙️ CI/CD Pipeline
+## CI/CD Pipeline
 
 GitHub Actions automates:
 
@@ -42,7 +42,7 @@ GitHub Actions automates:
 
 ---
 
-## 🛡️ Compliance Automation
+## Compliance Automation
 
 Custom Python/Bash scripts to detect:
 
@@ -56,7 +56,7 @@ Scripts use AWS SDK (boto3) to inspect configurations in us-east-1.
 ![Alt text](DIAGRAM.png)
 
 ---
-## 📁 Project Structure
+## Project Structure
 
 ```bash
 secure-microservices-compliance-platform/
